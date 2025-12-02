@@ -7,10 +7,13 @@
 #include <curl/curl.h>
 #include <openssl/md5.h>
 #include <openssl/evp.h>
-
+#ifndef USERNAME
+#define USERNAME "admin"
+#endif
+#ifndef PASSWORD
+#define PASSWORD "admin"
+#endif
 static volatile int running = 1;
-static const char *USERNAME = "admin";
-static const char *PASSWORD = "admin";
 
 void int_handler(int sig) {
     (void)sig;
@@ -18,12 +21,18 @@ void int_handler(int sig) {
 }
 
 char *md5_hex(const char *s) {
-    unsigned char d[MD5_DIGEST_LENGTH];
-    MD5((unsigned char*)s, strlen(s), d);
-    char *out = malloc(2 * MD5_DIGEST_LENGTH + 1);
-    for(int i = 0; i < MD5_DIGEST_LENGTH; i++)
+    EVP_MD_CTX *mdctx;
+    unsigned char d[EVP_MD_size(EVP_md5())];
+    unsigned int len;
+    mdctx = EVP_MD_CTX_new();
+    EVP_DigestInit_ex(mdctx, EVP_md5(), NULL);
+    EVP_DigestUpdate(mdctx, s, strlen(s));
+    EVP_DigestFinal_ex(mdctx, d, &len);
+    EVP_MD_CTX_free(mdctx);
+    char *out = malloc(2 * len + 1);
+    for(int i = 0; i < len; i++)
         sprintf(out + 2*i, "%02x", d[i]);
-    out[2 * MD5_DIGEST_LENGTH] = 0;
+    out[2 * len] = 0;
     return out;
 }
 

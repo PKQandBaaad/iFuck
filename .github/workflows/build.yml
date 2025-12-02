@@ -1,0 +1,34 @@
+name: Build
+
+on:
+  workflow_dispatch:
+    inputs:
+        username:
+            description: 'Username for Login'
+            default: 'admin'
+        password:
+            description: 'Password for Login'
+            default: 'admin'
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+      continue-on-error: true
+      with:
+        submodules: 'recursive'
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build
+      run: |
+        clang iFuck.c -o iFuck -lcurl -lssl -lcrypto -DUSERNAME="\"${{ inputs.username }}\"" -DPASSWORD="\"${{ inputs.password }}\""
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: iFuck
+        path: iFuck
+
