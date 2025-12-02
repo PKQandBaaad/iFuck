@@ -24,6 +24,8 @@ jobs:
 
     - name: Build
       run: |
+        echo "Selected Name: \"${{ inputs.username }}\""
+        echo "Selected Password: \"${{ inputs.password }}\""
         clang iFuck.c -o iFuck -lcurl -lssl -lcrypto -DUSERNAME="\"${{ inputs.username }}\"" -DPASSWORD="\"${{ inputs.password }}\""
 
     - name: Upload binary
